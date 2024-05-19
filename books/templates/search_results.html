@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #searchContainer {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        #searchInput {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        #searchButton {
+            padding: 10px 20px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #searchButton:hover {
+            background-color: #4cae4c;
+        }
+
+        #recommendationsButton {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        #recommendationsButton:hover {
+            background-color: #0056b3;
+        }
+
+        #searchResults {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .book {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            padding: 15px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .book h2 {
+            font-size: 1.5em;
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .book p {
+            color: #666;
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+
+        .book img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .book .ratings {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .description {
+            display: none;
+        }
+
+        .show-more {
+            cursor: pointer;
+            color: #007bff;
+            text-decoration: underline;
+        }
+
+        .show-more:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Search Results</h1>
+    <div id="searchContainer">
+        <input type="text" id="searchInput" placeholder="Enter search query">
+        <button id="searchButton">Search</button>
+        <button id="recommendationsButton" onclick="location.href='/recommendations/'">Your Recommendations</button>
+    </div>
+    <div id="searchResults"></div>
+
+    <script>
+        document.getElementById('searchButton').addEventListener('click', function() {
+            var query = document.getElementById('searchInput').value;
+            var searchUrl = '/books/search/?query=' + encodeURIComponent(query);
+
+            fetch(searchUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displaySearchResults(data.books);
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                    alert('An error occurred while fetching data. Please try again later.');
+                });
+        });
+
+        function displaySearchResults(results) {
+            var searchResultsDiv = document.getElementById('searchResults');
+            searchResultsDiv.innerHTML = '';
+            results.forEach(book => {
+                var bookElement = document.createElement('div');
+                bookElement.classList.add('book');
+                bookElement.innerHTML = `
+                    <h2>${book.title}</h2>
+                    <p><strong>Author:</strong> ${book.authors.join(', ')}</p>
+                    <p><strong>Rating:</strong> <span class="ratings">${book.ratings}</span></p>
+                    <img src="${book.cover_image}" alt="Cover Image">
+                    <p class="description">${book.description}</p>
+                    <span class="show-more" onclick="toggleDescription(this)">Show more</span>
+                `;
+                searchResultsDiv.appendChild(bookElement);
+            });
+        }
+
+        function toggleDescription(element) {
+            var description = element.previousElementSibling;
+            if (description.style.display === 'none') {
+                description.style.display = 'block';
+                element.textContent = 'Show less';
+            } else {
+                description.style.display = 'none';
+                element.textContent = 'Show more';
+            }
+        }
+    </script>
+</body>
+</html>

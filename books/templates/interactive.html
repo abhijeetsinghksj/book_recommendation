@@ -1,0 +1,219 @@
+<!-- templates/interactive.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Book Recommendations</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 20px;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #333;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+    padding: 10px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+input[type="submit"],
+button {
+    padding: 10px 20px;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button {
+    margin-left: 10px;
+}
+
+input[type="submit"]:hover,
+button:hover {
+    background-color: #4cae4c;
+}
+
+select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+#recommendations {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.recommendation {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+    padding: 15px;
+    width: 300px;
+    text-align: center;
+}
+
+.recommendation h2 {
+    font-size: 1.5em;
+    margin: 10px 0;
+    color: #333;
+}
+
+.recommendation p {
+    color: #666;
+    font-size: 0.9em;
+    margin: 5px 0;
+}
+
+.recommendation img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.delete-button {
+    padding: 10px 20px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+</style
+</head>
+<body>
+    <h1>Interactive Book Recommendations</h1>
+    <form id="recommendation-form">
+        <input type="text" id="title" name="title" placeholder="Title">
+        <input type="text" id="author" name="author" placeholder="Author">
+        <textarea id="description" name="description" placeholder="Description"></textarea>
+        <input type="text" id="cover_image" name="cover_image" placeholder="Cover Image URL">
+        <input type="number" id="ratings" name="ratings" placeholder="Ratings">
+        <input type="text" id="genre" name="genre" placeholder="Genre">
+        <button type="submit">Submit Recommendation</button>
+    </form>
+    
+    <h2>Filter Recommendations</h2>
+    <form id="filter-form">
+        <input type="text" id="filter_genre" name="filter_genre" placeholder="Genre">
+        <input type="number" id="filter_min_rating" name="filter_min_rating" placeholder="Min Rating">
+        <input type="number" id="filter_max_rating" name="filter_max_rating" placeholder="Max Rating">
+        <select id="order_by" name="order_by">
+            <option value="">Order By</option>
+            <option value="ratings">Ratings</option>
+        </select>
+        <button type="button" id="filter-button">Filter</button>
+    </form>
+    
+    <div id="recommendations"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#recommendation-form').submit(function(event) {
+                event.preventDefault();
+                const formData = {
+                    title: $('#title').val(),
+                    author: $('#author').val(),
+                    description: $('#description').val(),
+                    cover_image: $('#cover_image').val(),
+                    ratings: $('#ratings').val(),
+                    genre: $('#genre').val()
+                };
+                $.ajax({
+                    url: '/books/submit/',
+                    method: 'POST',
+                    data: JSON.stringify(formData),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        alert('Recommendation saved successfully');
+                        fetchRecommendations();
+                    }
+                });
+            });
+
+            $('#filter-button').click(function() {
+                const filterData = {
+                    genre: $('#filter_genre').val(),
+                    min_rating: $('#filter_min_rating').val(),
+                    max_rating: $('#filter_max_rating').val(),
+                    order_by: $('#order_by').val()
+                };
+                $.ajax({
+                    url: '/books/filter/',
+                    method: 'GET',
+                    data: filterData,
+                    success: function(data) {
+                        displayRecommendations(data.recommendations);
+                    }
+                });
+            });
+
+            function fetchRecommendations() {
+                $.ajax({
+                    url: '/recommendations/all/',
+                    method: 'GET',
+                    success: function(data) {
+                        displayRecommendations(data.recommendations);
+                    }
+                });
+            }
+
+            function displayRecommendations(recommendations) {
+                let html = '';
+                recommendations.forEach(function(recommendation) {
+                    html += '<div class="recommendation" data-id="' + recommendation.id + '">';
+                    html += '<h2>' + recommendation.title + '</h2>';
+                    html += '<p><strong>Author:</strong> ' + recommendation.author + '</p>';
+                    html += '<p><strong>Description:</strong> ' + recommendation.description + '</p>';
+                    html += '<img src="' + recommendation.cover_image + '" alt="Cover Image">';
+                    html += '<p><strong>Rating:</strong> ' + recommendation.ratings + '</p>';
+                    html += '<p><strong>Genre:</strong> ' + recommendation.genre + '</p>';
+                    html += '<button class="delete-button">Delete</button>';
+                    html += '</div>';
+                });
+                $('#recommendations').html(html);
+
+                $('.delete-button').click(function() {
+                    const recommendationId = $(this).closest('.recommendation').data('id');
+                    $.ajax({
+                        url: '/books/delete/' + recommendationId + '/',
+                        method: 'DELETE',
+                        success: function(response) {
+                            alert('Recommendation deleted successfully');
+                            fetchRecommendations();
+                        }
+                    });
+                });
+            }
+
+            fetchRecommendations();
+        });
+    </script>
+</body>
+</html>
