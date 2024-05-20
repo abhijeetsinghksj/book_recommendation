@@ -24,5 +24,7 @@ pip install -r requirements.txt
 # Run the project
 python manage.py runserver
 
-Documentation:-
+
+
+# Api Documentation:-
 https://documenter.getpostman.com/view/35026177/2sA3QmCuJu
