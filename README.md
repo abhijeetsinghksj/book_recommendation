@@ -7,7 +7,7 @@ This is a Django project for [brief description].
 ## Installation
 To get a local copy up and running follow these simple steps:
 # Clone the repository
-git clone https://github.com/your-username/your-repository-name.git
+git clone https://github.com/abhijeetsinghksj/book_recommendation.git
 
 # Navigate to the project directory
 cd your-repository-name
