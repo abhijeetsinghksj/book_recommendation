@@ -2,7 +2,7 @@
 # Django Task
 
 ## Overview
-This is a Django project for [brief description].
+This is a Django project for book recomendation.
 
 ## Installation
 To get a local copy up and running follow these simple steps:
